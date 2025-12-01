@@ -2,70 +2,161 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lista de Tarefas</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .urgente {
+            color: #dc3545 !important;
+            font-weight: bold;
+        }
+        .badge-baixa { background-color: #198754; }
+        .badge-normal { background-color: #ffc107; color: #000; }
+        .badge-urgente { background-color: #dc3545; }
+    </style>
 </head>
 
 <body class="bg-light">
-
 <div class="container mt-5">
-
-    <h1 class="text-center mb-4"> Lista de Tarefas</h1>
-
-    <div class="d-flex justify-content-end mb-3">
-        <a href="Ultimo Trabalho02.html" class="btn btn-primary"> Nova Tarefa</a>
+    <h1 class="text-center mb-4">📋 Lista de Tarefas</h1>
+    
+    <div class="d-flex justify-content-between mb-4">
+        <div>
+            <span class="badge badge-baixa me-2">Baixa</span>
+            <span class="badge badge-normal me-2">Normal</span>
+            <span class="badge badge-urgente">Urgente</span>
+        </div>
+        <a href="cadastro.html" class="btn btn-primary">➕ Nova Tarefa</a>
     </div>
 
     <div class="card shadow">
         <div class="card-body">
-            <table class="table table-hover">
+            <div id="mensagem-vazia" class="text-center py-5" style="display: none;">
+                <h4 class="text-muted">📭 Nenhuma tarefa cadastrada</h4>
+                <p class="text-muted">Clique em "Nova Tarefa" para começar</p>
+            </div>
+            
+            <table class="table table-hover" id="tabela-tarefas" style="display: none;">
                 <thead class="table-dark">
                     <tr>
-                        <th>Prioridade</th>
-                        <th>Descrição</th>
-                        <th>Local</th>
-                        <th>Recursos</th>
-                        <th>Data Limite</th>
-                        <th>Matrícula</th>
+                        <th width="15%">Prioridade</th>
+                        <th width="25%">Descrição</th>
+                        <th width="15%">Local</th>
+                        <th width="20%">Recursos Necessários</th>
+                        <th width="15%">Data Limite</th>
+                        <th width="10%">Matrícula</th>
                     </tr>
                 </thead>
-                <tbody id="tabela"></tbody>
+                <tbody id="corpo-tabela">
+                    <!-- Tarefas serão inseridas aqui via JavaScript -->
+                </tbody>
             </table>
         </div>
     </div>
-
 </div>
 
 <script>
-    function carregarTarefas() {
-        const tarefas = JSON.parse(localStorage.getItem("tarefas")) || [];
-        const tabela = document.getElementById("tabela");
-        tabela.innerHTML = "";
+    // Função para formatar data
+    function formatarData(dataString) {
+        if (!dataString) return '';
+        const data = new Date(dataString);
+        return data.toLocaleDateString('pt-BR') + ' ' + data.toLocaleTimeString('pt-BR', { 
+            hour: '2-digit', 
+            minute: '2-digit' 
+        });
+    }
 
-        for (const tarefa of tarefas) {
-            const tr = document.createElement("tr");
-
-            tr.innerHTML = `
-                <td><span class="badge bg-${getCor(tarefa.prioridade)}">${tarefa.prioridade}</span></td>
-                <td>${tarefa.descricao}</td>
-                <td>${tarefa.local}</td>
-                <td>${tarefa.recursosNecessarios.join(", ")}</td>
-                <td>${tarefa.dataLimite}</td>
-                <td>${tarefa.matricula}</td>
-            `;
-
-            tabela.appendChild(tr);
+    // Função para obter cor da badge baseada na prioridade
+    function getClassePrioridade(prioridade) {
+        switch(prioridade) {
+            case 'Baixa': return 'badge-baixa';
+            case 'Normal': return 'badge-normal';
+            case 'Urgente': return 'badge-urgente';
+            default: return 'badge-secondary';
         }
     }
 
-    function getCor(prio) {
-        if (prio === "Urgente") return "danger";
-        if (prio === "Normal") return "warning";
-        return "success";
+    // Função para carregar e exibir tarefas
+    function carregarTarefas() {
+        const tarefas = JSON.parse(localStorage.getItem('tarefas')) || [];
+        const corpoTabela = document.getElementById('corpo-tabela');
+        const tabela = document.getElementById('tabela-tarefas');
+        const mensagemVazia = document.getElementById('mensagem-vazia');
+        
+        // Limpar tabela
+        corpoTabela.innerHTML = '';
+        
+        // Verificar se há tarefas
+        if (tarefas.length === 0) {
+            tabela.style.display = 'none';
+            mensagemVazia.style.display = 'block';
+            return;
+        }
+        
+        // Mostrar tabela e esconder mensagem
+        tabela.style.display = 'table';
+        mensagemVazia.style.display = 'none';
+        
+        // Ordenar tarefas: Urgente primeiro, depois Normal, depois Baixa
+        tarefas.sort((a, b) => {
+            const ordem = { 'Urgente': 1, 'Normal': 2, 'Baixa': 3 };
+            return ordem[a.prioridade] - ordem[b.prioridade];
+        });
+        
+        // Adicionar cada tarefa na tabela
+        tarefas.forEach(tarefa => {
+            const tr = document.createElement('tr');
+            
+            // Aplicar classe urgente se necessário
+            if (tarefa.prioridade === 'Urgente') {
+                tr.classList.add('urgente');
+            }
+            
+            // Formatar recursos
+            const recursosFormatados = Array.isArray(tarefa.recursosNecessarios) 
+                ? tarefa.recursosNecessarios.join(', ')
+                : tarefa.recursosNecessarios || '';
+            
+            tr.innerHTML = `
+                <td>
+                    <span class="badge ${getClassePrioridade(tarefa.prioridade)}">
+                        ${tarefa.prioridade}
+                    </span>
+                </td>
+                <td>${tarefa.descricao || ''}</td>
+                <td>${tarefa.local || ''}</td>
+                <td>
+                    <small>${recursosFormatados}</small>
+                </td>
+                <td>
+                    <small class="text-muted">${formatarData(tarefa.dataLimite)}</small>
+                </td>
+                <td>${tarefa.matricula || ''}</td>
+            `;
+            
+            corpoTabela.appendChild(tr);
+        });
     }
 
-    carregarTarefas();
+    // Carregar tarefas quando a página carregar
+    document.addEventListener('DOMContentLoaded', carregarTarefas);
+    
+    // Adicionar exemplo pré-cadastrado se não houver tarefas
+    window.onload = function() {
+        const tarefas = JSON.parse(localStorage.getItem('tarefas')) || [];
+        if (tarefas.length === 0) {
+            const exemplo = {
+                prioridade: 'Urgente',
+                descricao: 'Entregar trabalho final DWI',
+                local: 'IFC',
+                recursosNecessarios: ['Computador', 'Internet', 'Exemplos das aulas anteriores'],
+                dataLimite: '2025-12-03 00:00:00',
+                matricula: '3030303'
+            };
+            localStorage.setItem('tarefas', JSON.stringify([exemplo]));
+            carregarTarefas();
+        }
+    };
 </script>
-
 </body>
 </html>
