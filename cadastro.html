@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastrar Tarefa</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+
+
+</head>
+
+<body class="bg-light">
+<div class="container mt-5">
+    <h1 class="text-center mb-4">📝 Cadastrar Nova Tarefa</h1>
+    
+    <div class="d-flex mb-4">
+        <a href="index.html" class="btn btn-secondary">⬅️ Voltar para Lista</a>
+    </div>
+
+    <div class="card shadow">
+        <div class="card-body">
+            <form id="form-tarefa" novalidate>
+                <!-- Prioridade -->
+                <div class="mb-3">
+                    <label for="prioridade" class="form-label fw-bold">Prioridade *</label>
+                    <select id="prioridade" class="form-select" required>
+                        <option value="">Selecione a prioridade...</option>
+                        <option value="Baixa">Baixa</option>
+                        <option value="Normal">Normal</option>
+                        <option value="Urgente">Urgente</option>
+                    </select>
+                    <div class="error-message" id="prioridade-error">
+                        Por favor, selecione uma prioridade.
+                    </div>
+                </div>
+
+                <!-- Descrição -->
+                <div class="mb-3">
+                    <label for="descricao" class="form-label fw-bold">Descrição *</label>
+                    <input type="text" id="descricao" class="form-control" 
+                           placeholder="Descreva a tarefa..." required maxlength="200">
+                    <div class="error-message" id="descricao-error">
+                        Por favor, informe uma descrição para a tarefa.
+                    </div>
+                </div>
+
+                <!-- Local -->
+                <div class="mb-3">
+                    <label for="local" class="form-label fw-bold">Local *</label>
+                    <input type="text" id="local" class="form-control" 
+                           placeholder="Onde a tarefa será realizada..." required maxlength="100">
+                    <div class="error-message" id="local-error">
+                        Por favor, informe o local da tarefa.
+                    </div>
+                </div>
+
+                <!-- Recursos Necessários -->
+                <div class="mb-3">
+                    <label for="recursos" class="form-label fw-bold">Recursos Necessários</label>
+                    <textarea id="recursos" class="form-control" rows="3" 
+                              placeholder="Digite os recursos necessários, separando por vírgula..."></textarea>
+                    <div class="form-text">
+                        Exemplo: Computador, Internet, Material de estudo, Caneta
+                    </div>
+                </div>
+
+                <!-- Data Limite -->
+                <div class="mb-3">
+                    <label for="dataLimite" class="form-label fw-bold">Data Limite *</label>
+                    <input type="datetime-local" id="dataLimite" class="form-control" required>
+                    <div class="error-message" id="dataLimite-error">
+                        Por favor, selecione uma data limite.
+                    </div>
+                </div>
+
+                <!-- Matrícula -->
+                <div class="mb-4">
+                    <label for="matricula" class="form-label fw-bold">Matrícula *</label>
+                    <input type="text" id="matricula" class="form-control" 
+                           placeholder="Número de matrícula..." required pattern="[0-9]+" maxlength="20">
+                    <div class="error-message" id="matricula-error">
+                        Por favor, informe uma matrícula válida (apenas números).
+                    </div>
+                </div>
+
+                <!-- Botões -->
+                <div class="d-flex justify-content-between">
+                    <button type="button" class="btn btn-outline-secondary" onclick="limparFormulario()">
+                        🔄 Limpar
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        💾 Salvar Tarefa
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal de confirmação -->
+    <div class="modal fade" id="modalConfirmacao" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">✅ Tarefa Cadastrada!</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    Tarefa cadastrada com sucesso!
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        Cadastrar outra
+                    </button>
+                    <a href="index.html" class="btn btn-primary">Ver Lista</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // Referências aos elementos do formulário
+    const form = document.getElementById('form-tarefa');
+    const prioridade = document.getElementById('prioridade');
+    const descricao = document.getElementById('descricao');
+    const local = document.getElementById('local');
+    const recursos = document.getElementById('recursos');
+    const dataLimite = document.getElementById('dataLimite');
+    const matricula = document.getElementById('matricula');
+    
+    // Configurar data mínima como hoje
+    window.onload = function() {
+        const hoje = new Date();
+        const dataFormatada = hoje.toISOString().slice(0, 16);
+        dataLimite.min = dataFormatada;
+        dataLimite.value = dataFormatada;
+    };
+
+    // Função para mostrar erro
+    function mostrarErro(elemento, mensagemId, mostrar) {
+        const erro = document.getElementById(mensagemId);
+        if (mostrar) {
+            erro.style.display = 'block';
+            elemento.classList.add('is-invalid');
+        } else {
+            erro.style.display = 'none';
+            elemento.classList.remove('is-invalid');
+        }
+    }
+
+    // Validação em tempo real
+    prioridade.addEventListener('change', function() {
+        mostrarErro(prioridade, 'prioridade-error', !this.value);
+    });
+    
+    descricao.addEventListener('input', function() {
+        mostrarErro(descricao, 'descricao-error', !this.value.trim());
+    });
+    
+    local.addEventListener('input', function() {
+        mostrarErro(local, 'local-error', !this.value.trim());
+    });
+    
+    dataLimite.addEventListener('change', function() {
+        mostrarErro(dataLimite, 'dataLimite-error', !this.value);
+    });
+    
+    matricula.addEventListener('input', function() {
+        const valido = this.value.trim() !== '' && /^[0-9]+$/.test(this.value);
+        mostrarErro(matricula, 'matricula-error', !valido);
+    });
+
+    // Função para limpar formulário
+    function limparFormulario() {
+        form.reset();
+        // Resetar validações
+        [prioridade, descricao, local, dataLimite, matricula].forEach(el => {
+            el.classList.remove('is-invalid', 'is-valid');
+        });
+        // Esconder todas as mensagens de erro
+        document.querySelectorAll('.error-message').forEach(el => {
+            el.style.display = 'none';
+        });
+        // Resetar data para hoje
+        const hoje = new Date();
+        dataLimite.value = hoje.toISOString().slice(0, 16);
+    }
+
+    // Processar recursos (converter string em array)
+    function processarRecursos(recursosStr) {
+        if (!recursosStr.trim()) return [];
+        
+        return recursosStr.split(',')
+            .map(item => item.trim())
+            .filter(item => item !== '');
+    }
+
+    // Função principal para cadastrar tarefa
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Validar todos os campos obrigatórios
+        const camposValidos = [
+            { campo: prioridade, erro: 'prioridade-error' },
+            { campo: descricao, erro: 'descricao-error' },
+            { campo: local, erro: 'local-error' },
+            { campo: dataLimite, erro: 'dataLimite-error' },
+            { campo: matricula, erro: 'matricula-error' }
+        ];
+        
+        let formularioValido = true;
+        
+        camposValidos.forEach(({ campo, erro }) => {
+            let valido = false;
+            
+            if (campo === matricula) {
+                valido = campo.value.trim() !== '' && /^[0-9]+$/.test(campo.value);
+            } else {
+                valido = campo.value.trim() !== '';
+            }
+            
+            if (!valido) {
+                mostrarErro(campo, erro, true);
+                formularioValido = false;
+            } else {
+                mostrarErro(campo, erro, false);
+                campo.classList.add('is-valid');
+            }
+        });
+        
+        if (!formularioValido) {
+            // Rolar para o primeiro erro
+            const primeiroErro = document.querySelector('.is-invalid');
+            if (primeiroErro) {
+                primeiroErro.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                primeiroErro.focus();
+            }
+            return;
+        }
+        
+        // Criar objeto da tarefa
+        const novaTarefa = {
+            prioridade: prioridade.value,
+            descricao: descricao.value.trim(),
+            local: local.value.trim(),
+            recursosNecessarios: processarRecursos(recursos.value),
+            dataLimite: dataLimite.value + ':00', // Adicionar segundos
+            matricula: matricula.value.trim()
+        };
+        
+        // Salvar no localStorage
+        let tarefas = JSON.parse(localStorage.getItem('tarefas')) || [];
+        tarefas.push(novaTarefa);
+        localStorage.setItem('tarefas', JSON.stringify(tarefas));
+        
+        // Mostrar modal de confirmação
+        const modal = new bootstrap.Modal(document.getElementById('modalConfirmacao'));
+        modal.show();
+        
+        // Limpar formulário após 2 segundos se o usuário não clicar nos botões
+        setTimeout(() => {
+            if (!document.querySelector('.modal.show')) {
+                limparFormulario();
+            }
+        }, 2000);
+    });
+
+    // Limpar formulário quando o modal for fechado
+    document.getElementById('modalConfirmacao').addEventListener('hidden.bs.modal', function() {
+        limparFormulario();
+    });
+</script>
+</body>
+</html>

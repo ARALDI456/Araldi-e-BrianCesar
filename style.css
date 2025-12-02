@@ -1,0 +1,42 @@
+/* ===========================
+   Estilos do cadastro.html
+   =========================== */
+
+.form-control:invalid, 
+.form-select:invalid {
+    border-color: #dc3545;
+}
+
+.form-control:valid, 
+.form-select:valid {
+    border-color: #198754;
+}
+
+.error-message {
+    color: #dc3545;
+    font-size: 0.875em;
+    margin-top: 0.25rem;
+    display: none;
+}
+
+/* ===========================
+   Estilos do index.html
+   =========================== */
+
+.urgente {
+    color: #dc3545 !important;
+    font-weight: bold;
+}
+
+.badge-baixa { 
+    background-color: #198754; 
+}
+
+.badge-normal { 
+    background-color: #ffc107; 
+    color: #000; 
+}
+
+.badge-urgente { 
+    background-color: #dc3545; 
+}
